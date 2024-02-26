@@ -1,0 +1,35 @@
+name: Build
+on: [workflow_dispatch]
+jobs:
+  build-ipa:
+    name: build-ipa
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Get flutter version
+        run: |
+          FLUTTER_VERSION=$(cat ../FLUTTER_VERSION)
+          echo "FLUTTER_VERSION=${FLUTTER_VERSION}" >> $GITHUB_ENV
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'master'
+      - name: Cleanup
+        run: |
+          flutter clean
+          flutter pub get
+          flutter doctor -v
+      - name: Build
+        run: |
+          rm -f .env
+          cp .env.example .env
+          flutter build ios --release --no-codesign
+      - name: Packing IPA
+        run: |
+          cd build/ios/iphoneos/
+          rm -rf Payload
+          mkdir Payload
+          cp -R Runner.app Payload/
+          rm -f retro-sideloading-ios.ipa
+          zip -vr retro-sideloading-ios.ipa Payload/
