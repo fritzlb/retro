@@ -28,3 +28,9 @@ jobs:
           cp -R Runner.app Payload/
           rm -f retro-sideloading-ios.ipa
           zip -vr retro-sideloading-ios.ipa Payload/
+      - name: Archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: ipa-build
+          path: build/ios/iphoneos/retro-sideloading-ios.ipa
+          compression-level: 0
